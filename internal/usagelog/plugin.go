@@ -115,6 +115,10 @@ func (p *plugin) HandleUsage(ctx context.Context, record coreusage.Record) {
 		return
 	}
 
+	if _, errStdout := fmt.Fprintln(os.Stdout, string(encoded)); errStdout != nil {
+		log.WithError(errStdout).Debug("usagelog: failed to write token usage record to stdout")
+	}
+
 	if errWrite := p.writeLine(timestamp, encoded); errWrite != nil {
 		log.WithError(errWrite).Debug("usagelog: failed to write token usage record")
 	}
