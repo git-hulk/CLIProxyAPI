@@ -32,6 +32,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/store"
 	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/translator"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/tui"
+	_ "github.com/router-for-me/CLIProxyAPI/v7/internal/usagelog"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
 	sdkAuth "github.com/router-for-me/CLIProxyAPI/v7/sdk/auth"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/auth"
