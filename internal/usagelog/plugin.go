@@ -59,13 +59,19 @@ func (p *plugin) HandleUsage(ctx context.Context, record coreusage.Record) {
 
 	usageDetailJSON := ""
 	detail := usageDetail{
-		PromptTokenCount:         record.Detail.InputTokens,
-		CandidatesTokenCount:     record.Detail.OutputTokens,
-		ThoughtsTokenCount:       record.Detail.ReasoningTokens,
-		CachedContentTokenCount:  record.Detail.CachedTokens,
-		CacheReadInputTokens:     record.Detail.CacheReadTokens,
-		CacheCreationInputTokens: record.Detail.CacheCreationTokens,
-		TotalTokenCount:          record.Detail.TotalTokens,
+		CompletionTokens: record.Detail.OutputTokens,
+		CompletionTokensDetails: completionTokensDetails{
+			ReasoningTokens: record.Detail.ReasoningTokens,
+		},
+		LatencyCheckpoint: latencyCheckpoint{
+			TotalDurationMs:   record.Latency.Milliseconds(),
+			UserVisibleTTFTMs: record.TTFT.Milliseconds(),
+		},
+		PromptTokens: record.Detail.InputTokens,
+		PromptTokensDetails: promptTokensDetails{
+			CachedTokens: record.Detail.CachedTokens,
+		},
+		TotalTokens: record.Detail.TotalTokens,
 	}
 	if detailBytes, errMarshalDetail := json.Marshal(detail); errMarshalDetail == nil {
 		usageDetailJSON = string(detailBytes)
@@ -217,11 +223,34 @@ type failDetail struct {
 }
 
 type usageDetail struct {
-	PromptTokenCount         int64 `json:"promptTokenCount"`
-	CandidatesTokenCount     int64 `json:"candidatesTokenCount"`
-	ThoughtsTokenCount       int64 `json:"thoughtsTokenCount,omitempty"`
-	CachedContentTokenCount  int64 `json:"cachedContentTokenCount,omitempty"`
-	CacheReadInputTokens     int64 `json:"cacheReadInputTokens,omitempty"`
-	CacheCreationInputTokens int64 `json:"cacheCreationInputTokens,omitempty"`
-	TotalTokenCount          int64 `json:"totalTokenCount"`
+	CompletionTokens        int64                   `json:"completion_tokens"`
+	CompletionTokensDetails completionTokensDetails `json:"completion_tokens_details"`
+	LatencyCheckpoint       latencyCheckpoint       `json:"latency_checkpoint"`
+	PromptTokens            int64                   `json:"prompt_tokens"`
+	PromptTokensDetails     promptTokensDetails     `json:"prompt_tokens_details"`
+	TotalTokens             int64                   `json:"total_tokens"`
+}
+
+type completionTokensDetails struct {
+	AcceptedPredictionTokens int64 `json:"accepted_prediction_tokens"`
+	AudioTokens              int64 `json:"audio_tokens"`
+	ReasoningTokens          int64 `json:"reasoning_tokens"`
+	RejectedPredictionTokens int64 `json:"rejected_prediction_tokens"`
+}
+
+type promptTokensDetails struct {
+	AudioTokens  int64 `json:"audio_tokens"`
+	CachedTokens int64 `json:"cached_tokens"`
+}
+
+type latencyCheckpoint struct {
+	EngineTBTMs       int64 `json:"engine_tbt_ms"`
+	EngineTTFTMs      int64 `json:"engine_ttft_ms"`
+	EngineTTLTMs      int64 `json:"engine_ttlt_ms"`
+	PreInferenceMs    int64 `json:"pre_inference_ms"`
+	ServiceTBTMs      int64 `json:"service_tbt_ms"`
+	ServiceTTFTMs     int64 `json:"service_ttft_ms"`
+	ServiceTTLTMs     int64 `json:"service_ttlt_ms"`
+	TotalDurationMs   int64 `json:"total_duration_ms"`
+	UserVisibleTTFTMs int64 `json:"user_visible_ttft_ms"`
 }
